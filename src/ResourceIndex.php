@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Atx\ResourceIndex;
 
-use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
 use App\Enums\SupportedLocale;
+use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
 use Atx\ResourceIndex\Exceptions\NotAModelClassException;
 use Atx\ResourceIndex\Exceptions\NotAResourceClassException;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -215,6 +214,7 @@ class ResourceIndex implements ResourceIndexContract
                     $value = [$value];
                 }
                 $this->query->whereIn('id', $value);
+
                 continue;
             }
 
@@ -296,6 +296,7 @@ class ResourceIndex implements ResourceIndexContract
 
             if (isset($orderable[$sortColumn]) && is_callable($orderable[$sortColumn])) {
                 $orderable[$sortColumn]($this->query, $direction);
+
                 continue;
             }
 
@@ -315,10 +316,12 @@ class ResourceIndex implements ResourceIndexContract
                     );
                     $this->query->orderBy($relatedModel->getTable().'.'.$sortColumn, $direction);
                 }
+
                 continue;
             }
             if (Str::endsWith($sortColumn, SupportedLocale::suffixes())) {
                 [$sortColumn, $locale] = explode(':', $sortColumn, 2);
+
                 try {
                     $this->orderByTranslation($locale, $sortColumn, $direction);
                 } catch (Exception) {
