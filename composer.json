@@ -1,0 +1,46 @@
+{
+  "name": "feldoe/laravel-resource-index",
+  "description": "Simple service to build api response for resource index",
+  "keywords": [
+    "feldoe",
+    "laravel-resource-index"
+  ],
+  "homepage": "https://github.com/feldoe/laravel-resource-index",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Nicolas DENIAUD",
+      "email": "laravel@feldoe.net",
+      "homepage": "https://www.feldoe.net",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "illuminate/database": "^9.0",
+    "illuminate/http": "^9.0",
+    "illuminate/support": "^9.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Atx\\ResourceIndex\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Atx\\ResourceIndex\\Tests\\": "tests"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Atx\\ResourceIndex\\ResourceIndexServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
