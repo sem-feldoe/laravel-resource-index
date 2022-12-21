@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Atx\ResourceIndex;
 
-use Illuminate\Support\ServiceProvider;
 use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
+use Illuminate\Support\ServiceProvider;
 
 class ResourceIndexServiceProvider extends ServiceProvider
 {
