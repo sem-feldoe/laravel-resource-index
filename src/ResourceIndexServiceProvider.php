@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Atx\ResourceIndex;
 
 use Illuminate\Support\ServiceProvider;
+use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
 
 class ResourceIndexServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        $this->app->bind(
-            \Atx\ResourceIndex\Contracts\ResourceIndex::class,
-            \Atx\ResourceIndex\Contracts\ResourceIndex::class
-        );
-    }
+    public array $bindings = [
+        ResourceIndexContract::class => ResourceIndex::class,
+    ];
 }
