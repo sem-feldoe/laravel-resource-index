@@ -8,7 +8,11 @@ use Illuminate\Support\ServiceProvider;
 
 class ResourceIndexServiceProvider extends ServiceProvider
 {
-    public array $bindings = [
-        \Atx\ResourceIndex\Contracts\ResourceIndex::class => \Atx\ResourceIndex\Contracts\ResourceIndex::class,
-    ];
+    public function register(): void
+    {
+        $this->app->bind(
+            \Atx\ResourceIndex\Contracts\ResourceIndex::class,
+            \Atx\ResourceIndex\Contracts\ResourceIndex::class
+        );
+    }
 }
