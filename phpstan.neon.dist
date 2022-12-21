@@ -1,0 +1,11 @@
+parameters:
+    paths:
+        - src
+    level: 5
+    tmpDir: build/phpstan
+    checkMissingIterableValueType: false
+    checkModelProperties: true
+    treatPhpDocTypesAsCertain: false
+    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Class App\\Enums\\SupportedLocale not found\.#'

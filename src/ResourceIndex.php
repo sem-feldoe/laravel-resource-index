@@ -6,6 +6,7 @@ namespace Atx\ResourceIndex;
 
 use App\Enums\SupportedLocale;
 use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
+use Atx\ResourceIndex\Exceptions\MissingTranslationRequirementsException;
 use Atx\ResourceIndex\Exceptions\NotAModelClassException;
 use Atx\ResourceIndex\Exceptions\NotAResourceClassException;
 use Closure;
@@ -40,6 +41,8 @@ class ResourceIndex implements ResourceIndexContract
     protected string $defaultSortColumn = 'id';
 
     protected string $defaultSortDirection = 'asc';
+
+    protected bool $isMultilingual = false;
 
     /**
      * @throws NotAModelClassException
@@ -113,7 +116,6 @@ class ResourceIndex implements ResourceIndexContract
     }
 
     /**
-     *
      * @throws BindingResolutionException|NotAResourceClassException
      */
     public function processRequest(
@@ -123,20 +125,22 @@ class ResourceIndex implements ResourceIndexContract
         array $orderable = []
     ): self {
         if ($request->has('nested')) {
-            $this->nested = (bool) $request->get('nested', false);
+            $this->nested = $request->boolean('nested', false);
         }
 
         if (($usingPagination = $request->boolean('pagination', false)) && $usingPagination === true) {
             $this->withPagination = true;
         }
 
-        $this->processPagination($request->get('perPage'));
+        if ($request->has('perPage')) {
+            $this->perPage = $request->integer('perPage');
+        }
 
         $this->processFilters($request->get('filter', []), $filterable);
 
         $this->processSearch($request->get('search'), $searchable);
 
-        $this->processOrders($request->get('sort'), $orderable);
+        $this->processSorts($request->get('sort'), $orderable);
 
         return $this;
     }
@@ -147,15 +151,17 @@ class ResourceIndex implements ResourceIndexContract
     public function response(): JsonResponse
     {
         if ($this->withPagination) {
-            $query = $this->query->fastPaginate($this->perPage);
+            if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
+                $query = $this->query->fastPaginate($this->perPage); // @phpstan-ignore-line
+            } else {
+                $query = $this->query->paginate($this->perPage);
+            }
         } else {
             $query = $this->query->get();
         }
         if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
-            // We have a resource collection
             $resource = $this->resourceClassName::make($query);
         } else {
-            // We have a resource item
             $resource = $this->resourceClassName::collection($query);
         }
         if (! is_a($resource, JsonResource::class)) {
@@ -167,12 +173,12 @@ class ResourceIndex implements ResourceIndexContract
 
     private function init(): void
     {
+        $this->isMultilingual = enum_exists(\App\Enums\SupportedLocale::class)
+            && method_exists(\App\Enums\SupportedLocale::class, 'suffixes') // @phpstan-ignore-line
+            && count(\App\Enums\SupportedLocale::suffixes()) >= 2;
         $this->query = $this->model->newQuery()->select($this->model->getTable().'.*');
     }
 
-    /**
-     * override default query
-     */
     public function useQuery(BuilderContract $query): self
     {
         $this->query = $query;
@@ -196,13 +202,6 @@ class ResourceIndex implements ResourceIndexContract
         $this->query->with($relations, $callback);
 
         return $this;
-    }
-
-    protected function processPagination(?int $perPage): void
-    {
-        if (! is_null($perPage)) {
-            $this->perPage = $perPage;
-        }
     }
 
     protected function processFilters(array $filters, array $filterable): void
@@ -267,13 +266,13 @@ class ResourceIndex implements ResourceIndexContract
     /**
      * @throws BindingResolutionException|NotAResourceClassException
      */
-    protected function processOrders(?string $sort, array $orderable = []): void
+    protected function processSorts(?string $sort, array $sortable = []): void
     {
-        if (method_exists($this->query, 'ordered')) {
-            $this->query->ordered();
-        }
-
         if (is_null($sort)) {
+            if (method_exists($this->query, 'ordered')) {
+                $this->query->ordered();
+            }
+
             $this->query->orderBy($this->defaultSortColumn, $this->defaultSortDirection);
 
             return;
@@ -290,12 +289,12 @@ class ResourceIndex implements ResourceIndexContract
                 $direction = 'desc';
                 $sortColumn = ltrim($sortColumn, '-');
             }
-            if (! array_key_exists($sortColumn, $orderable) && ! in_array($sortColumn, $orderable)) {
+            if (! array_key_exists($sortColumn, $sortable) && ! in_array($sortColumn, $sortable)) {
                 continue;
             }
 
-            if (isset($orderable[$sortColumn]) && is_callable($orderable[$sortColumn])) {
-                $orderable[$sortColumn]($this->query, $direction);
+            if (isset($sortable[$sortColumn]) && is_callable($sortable[$sortColumn])) {
+                $sortable[$sortColumn]($this->query, $direction);
 
                 continue;
             }
@@ -319,11 +318,11 @@ class ResourceIndex implements ResourceIndexContract
 
                 continue;
             }
-            if (Str::endsWith($sortColumn, SupportedLocale::suffixes())) {
+            if ($this->isMultilingual && Str::endsWith($sortColumn, SupportedLocale::suffixes())) {  // @phpstan-ignore-line
                 [$sortColumn, $locale] = explode(':', $sortColumn, 2);
 
                 try {
-                    $this->orderByTranslation($locale, $sortColumn, $direction);
+                    $this->sortByTranslation($locale, $sortColumn, $direction);
                 } catch (Exception) {
                 }
             } else {
@@ -347,15 +346,14 @@ class ResourceIndex implements ResourceIndexContract
     }
 
     /**
-     * @throws BindingResolutionException
-     * @throws NotAResourceClassException
+     * @throws BindingResolutionException|\Atx\ResourceIndex\Exceptions\NotAResourceClassException|\Atx\ResourceIndex\Exceptions\MissingTranslationRequirementsException
      */
-    protected function orderByTranslation(
+    protected function sortByTranslation(
         string $locale,
         string $translationField,
         string $sortMethod = 'asc'
     ): BuilderContract {
-        if (! class_exists(\App\Enums\SupportedLocale::class) ||
+        if (! $this->isMultilingual ||
             ! method_exists($this->model, 'getTranslationModelName') ||
             ! method_exists($this->model, 'getLocaleKey')
         ) {
