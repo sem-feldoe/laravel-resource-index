@@ -44,6 +44,10 @@ class ResourceIndex implements ResourceIndexContract
 
     protected bool $isMultilingual = false;
 
+    protected ?int $limit = null;
+
+    protected ?int $offset = null;
+
     /**
      * @throws NotAModelClassException
      */
@@ -130,6 +134,13 @@ class ResourceIndex implements ResourceIndexContract
 
         if (($usingPagination = $request->boolean('pagination', false)) && $usingPagination === true) {
             $this->withPagination = true;
+        } else {
+            if ($request->has('limit')) {
+                $this->limit = $request->integer('limit');
+            }
+            if ($request->has('offset')) {
+                $this->offset = $request->integer('offset');
+            }
         }
 
         if ($request->has('perPage')) {
@@ -157,6 +168,12 @@ class ResourceIndex implements ResourceIndexContract
                 $query = $this->query->paginate($this->perPage);
             }
         } else {
+            if (!is_null($this->limit)) {
+                $this->query->take($this->limit);
+            }
+            if (!is_null($this->offset)) {
+                $this->query->skip($this->limit);
+            }
             $query = $this->query->get();
         }
         if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
