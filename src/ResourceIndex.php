@@ -168,10 +168,10 @@ class ResourceIndex implements ResourceIndexContract
                 $query = $this->query->paginate($this->perPage);
             }
         } else {
-            if (!is_null($this->limit)) {
+            if (! is_null($this->limit)) {
                 $this->query->take($this->limit);
             }
-            if (!is_null($this->offset)) {
+            if (! is_null($this->offset)) {
                 $this->query->skip($this->limit);
             }
             $query = $this->query->get();
