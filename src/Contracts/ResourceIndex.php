@@ -42,4 +42,6 @@ interface ResourceIndex
     public function materializeColumnName(string $column): string;
 
     public function setDefaultOrder(string $column, string $direction = 'asc'): self;
+
+    public function withTrashed(): self;
 }

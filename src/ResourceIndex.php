@@ -156,6 +156,15 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
+    public function withTrashed(): self
+    {
+        if (method_exists($this->query, 'trashed')) {
+            $this->query->withTrashed();
+        }
+
+        return $this;
+    }
+
     /**
      * @throws NotAResourceClassException
      */
