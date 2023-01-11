@@ -158,8 +158,8 @@ class ResourceIndex implements ResourceIndexContract
 
     public function withTrashed(): self
     {
-        if (method_exists($this->query, 'trashed')) {
-            $this->query->withTrashed();
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses($this->model))) {
+            $this->query->withTrashed(); // @phpstan-ignore-line
         }
 
         return $this;
