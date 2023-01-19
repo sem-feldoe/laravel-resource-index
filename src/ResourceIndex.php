@@ -283,7 +283,15 @@ class ResourceIndex implements ResourceIndexContract
                 if (is_callable($column)) {
                     $column($this, $query, $search);
                 } else {
-                    $query->orWhere($column, 'like', '%'.$search.'%');
+                    if (str_contains($column, '.')) {
+                        [$relation, $column] = explode('.', $column, 2);
+                        $query->orWhereHas(
+                            $relation,
+                            fn($relationQuery) => $relationQuery->where($column, 'like', '%'.$search.'%')
+                        );
+                    } else {
+                        $query->orWhere($column, 'like', '%'.$search.'%');
+                    }
                 }
             }
         });
