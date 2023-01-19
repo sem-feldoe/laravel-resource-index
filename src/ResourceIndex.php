@@ -287,7 +287,7 @@ class ResourceIndex implements ResourceIndexContract
                         [$relation, $column] = explode('.', $column, 2);
                         $query->orWhereHas(
                             $relation,
-                            fn($relationQuery) => $relationQuery->where($column, 'like', '%'.$search.'%')
+                            fn ($relationQuery) => $relationQuery->where($column, 'like', '%'.$search.'%')
                         );
                     } else {
                         $query->orWhere($column, 'like', '%'.$search.'%');
