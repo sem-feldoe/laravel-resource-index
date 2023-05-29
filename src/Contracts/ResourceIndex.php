@@ -14,7 +14,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 interface ResourceIndex
 {
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource): self;
+    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self;
 
     public function filter(array $filters): self;
 

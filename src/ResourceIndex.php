@@ -53,7 +53,7 @@ class ResourceIndex implements ResourceIndexContract
     /**
      * @throws NotAModelClassException
      */
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource): self
+    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self
     {
         if (is_string($model)) {
             $model = app($model);
@@ -72,6 +72,13 @@ class ResourceIndex implements ResourceIndexContract
         $this->resourceClassName = $resource;
 
         $this->init();
+
+        if (!is_null($request)) {
+            try {
+                $this->processRequest($request);
+            } catch (NotAResourceClassException) {
+            }
+        }
 
         return $this;
     }
