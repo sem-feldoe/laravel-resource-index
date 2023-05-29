@@ -73,7 +73,7 @@ class ResourceIndex implements ResourceIndexContract
 
         $this->init();
 
-        if (!is_null($request)) {
+        if (! is_null($request)) {
             try {
                 $this->processRequest($request);
             } catch (NotAResourceClassException) {
