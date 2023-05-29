@@ -392,8 +392,8 @@ class ResourceIndex implements ResourceIndexContract
                 continue;
             }
             if ($this->isMultilingual
-                && Str::endsWith($sortColumn, SupportedLocale::suffixes())
-            ) {  // @phpstan-ignore-line
+                && Str::endsWith($sortColumn, SupportedLocale::suffixes()) // @phpstan-ignore-line
+            ) {
                 [$sortColumn, $locale] = explode(':', $sortColumn, 2);
 
                 try {
