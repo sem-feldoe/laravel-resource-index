@@ -59,11 +59,11 @@ class ResourceIndex implements ResourceIndexContract
             $model = app($model);
         }
 
-        if (!is_string($resource)) {
+        if (! is_string($resource)) {
             $resource = get_class($resource);
         }
 
-        if (!is_a($model, Model::class)) {
+        if (! is_a($model, Model::class)) {
             throw NotAModelClassException::of($model);
         }
 
@@ -181,10 +181,10 @@ class ResourceIndex implements ResourceIndexContract
                 $query = $this->query->paginate($this->perPage);
             }
         } else {
-            if (!is_null($this->limit)) {
+            if (! is_null($this->limit)) {
                 $this->query->take($this->limit);
             }
-            if (!is_null($this->offset)) {
+            if (! is_null($this->offset)) {
                 $this->query->skip($this->limit);
             }
             $query = $this->query->get();
@@ -194,7 +194,7 @@ class ResourceIndex implements ResourceIndexContract
         } else {
             $resource = $this->resourceClassName::collection($query);
         }
-        if (!is_a($resource, JsonResource::class)) {
+        if (! is_a($resource, JsonResource::class)) {
             throw NotAResourceClassException::of($resource);
         }
 
@@ -262,7 +262,7 @@ class ResourceIndex implements ResourceIndexContract
         } catch (NotAResourceClassException) {
         }
 
-        if (!is_null($defaultSort)) {
+        if (! is_null($defaultSort)) {
             $this->setDefaultOrder($defaultSort, $defaultSortDirection);
         }
 
@@ -274,7 +274,7 @@ class ResourceIndex implements ResourceIndexContract
         foreach ($filters as $filter => $value) {
             // Special id filter
             if ($filter == 'id') {
-                if (!is_array($value)) {
+                if (! is_array($value)) {
                     $value = [$value];
                 }
                 $this->query->whereIn('id', $value);
@@ -282,7 +282,7 @@ class ResourceIndex implements ResourceIndexContract
                 continue;
             }
 
-            if (!array_key_exists($filter, $filterable)) {
+            if (! array_key_exists($filter, $filterable)) {
                 continue;
             }
             $filter = $filterable[$filter];
@@ -326,7 +326,7 @@ class ResourceIndex implements ResourceIndexContract
                         [$relation, $column] = explode('.', $column, 2);
                         $query->orWhereHas(
                             $relation,
-                            fn($relationQuery) => $relationQuery->where($column, 'like', '%'.$search.'%')
+                            fn ($relationQuery) => $relationQuery->where($column, 'like', '%'.$search.'%')
                         );
                     } else {
                         $query->orWhere($column, 'like', '%'.$search.'%');
@@ -362,7 +362,7 @@ class ResourceIndex implements ResourceIndexContract
                 $direction = 'desc';
                 $sortColumn = ltrim($sortColumn, '-');
             }
-            if (!array_key_exists($sortColumn, $sortable) && !in_array($sortColumn, $sortable)) {
+            if (! array_key_exists($sortColumn, $sortable) && ! in_array($sortColumn, $sortable)) {
                 continue;
             }
 
@@ -428,8 +428,8 @@ class ResourceIndex implements ResourceIndexContract
         string $translationField,
         string $sortMethod = 'asc'
     ): BuilderContract {
-        if (!$this->isMultilingual || !method_exists($this->model, 'getTranslationModelName')
-            || !method_exists($this->model, 'getLocaleKey')
+        if (! $this->isMultilingual || ! method_exists($this->model, 'getTranslationModelName')
+            || ! method_exists($this->model, 'getLocaleKey')
         ) {
             throw new MissingTranslationRequirementsException;
         }
@@ -444,7 +444,7 @@ class ResourceIndex implements ResourceIndexContract
             ->leftJoin(
                 $translationTable,
                 function (JoinClause $join) use ($translationTable, $localeKey, $table, $keyName, $locale) {
-                    if (!method_exists($this->model, 'getTranslationRelationKey')) {
+                    if (! method_exists($this->model, 'getTranslationRelationKey')) {
                         return;
                     }
                     $join->on(
