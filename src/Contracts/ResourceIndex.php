@@ -33,7 +33,7 @@ interface ResourceIndex
 
     public function allowedSearchColumn(array $columns): self;
 
-    public function allowedSorts(array $sorts): self;
+    public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self;
 
     public function response(): JsonResponse;
 
