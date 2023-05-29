@@ -48,6 +48,8 @@ class ResourceIndex implements ResourceIndexContract
 
     protected ?int $offset = null;
 
+    protected ?Request $request = null;
+
     /**
      * @throws NotAModelClassException
      */
@@ -153,6 +155,8 @@ class ResourceIndex implements ResourceIndexContract
 
         $this->processSorts($request->get('sort'), $orderable);
 
+        $this->request = $request;
+
         return $this;
     }
 
@@ -226,6 +230,32 @@ class ResourceIndex implements ResourceIndexContract
     public function with(array $relations, Closure|string|null $callback = null): self
     {
         $this->query->with($relations, $callback);
+
+        return $this;
+    }
+
+    public function withCount(array $relations): self
+    {
+        $this->query->withCount($relations);
+
+        return $this;
+    }
+
+    public function allowedFilters(array $filters): self {
+        $this->processFilters($this->getRequest()->get('filter', []), $filters);
+
+        return $this;
+    }
+    public function allowedSearchColumn(array $columns): self {
+        $this->processSearch($this->getRequest()->get('search'), $columns);
+
+        return $this;
+    }
+    public function allowedSorts(array $sorts): self {
+        try {
+            $this->processSorts($this->getRequest()->get('sort'), $sorts);
+        } catch (NotAResourceClassException) {
+        }
 
         return $this;
     }
@@ -415,5 +445,10 @@ class ResourceIndex implements ResourceIndexContract
                 }
             )
             ->orderBy("{$translationTable}.{$translationField}", $sortMethod);
+    }
+
+    protected function getRequest(): Request
+    {
+        return $this->request ?: request();
     }
 }

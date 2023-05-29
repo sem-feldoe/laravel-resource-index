@@ -29,11 +29,17 @@ interface ResourceIndex
         array $orderable = []
     ): self;
 
+    public function allowedFilters(array $filters): self;
+    public function allowedSearchColumn(array $columns): self;
+    public function allowedSorts(array $sorts): self;
+
     public function response(): JsonResponse;
 
     public function useQuery(BuilderContract $query): self;
 
     public function with(array $relations, Closure|string|null $callback = null): self;
+
+    public function withCount(array $relations): self;
 
     public function usingPagination(): self;
 
