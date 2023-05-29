@@ -30,7 +30,9 @@ interface ResourceIndex
     ): self;
 
     public function allowedFilters(array $filters): self;
+
     public function allowedSearchColumn(array $columns): self;
+
     public function allowedSorts(array $sorts): self;
 
     public function response(): JsonResponse;

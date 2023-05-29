@@ -241,17 +241,22 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-    public function allowedFilters(array $filters): self {
+    public function allowedFilters(array $filters): self
+    {
         $this->processFilters($this->getRequest()->get('filter', []), $filters);
 
         return $this;
     }
-    public function allowedSearchColumn(array $columns): self {
+
+    public function allowedSearchColumn(array $columns): self
+    {
         $this->processSearch($this->getRequest()->get('search'), $columns);
 
         return $this;
     }
-    public function allowedSorts(array $sorts): self {
+
+    public function allowedSorts(array $sorts): self
+    {
         try {
             $this->processSorts($this->getRequest()->get('sort'), $sorts);
         } catch (NotAResourceClassException) {
