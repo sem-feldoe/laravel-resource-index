@@ -483,9 +483,10 @@ class ResourceIndex implements ResourceIndexContract
         $request = $this->getRequest();
         if ($request->has('search')) {
             return $request->get('search');
-        } elseif($request->has('query')) {
+        } elseif ($request->has('query')) {
             return $request->get('query');
         }
+
         return null;
     }
 }
