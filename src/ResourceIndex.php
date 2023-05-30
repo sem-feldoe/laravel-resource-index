@@ -157,11 +157,17 @@ class ResourceIndex implements ResourceIndexContract
             $this->perPage = $request->integer('perPage');
         }
 
-        $this->processFilters($request->get('filter', []), $filterable);
+        if (!empty($filterable)) {
+            $this->processFilters($request->get('filter', []), $filterable);
+        }
 
-        $this->processSearch($this->getQuerySearch(), $searchable);
+        if (!empty($searchable)) {
+            $this->processSearch($this->getQuerySearch(), $searchable);
+        }
 
-        $this->processSorts($request->get('sort'), $orderable);
+        if (!empty($orderable)) {
+            $this->processSorts($request->get('sort'), $orderable);
+        }
 
         $this->request = $request;
 
