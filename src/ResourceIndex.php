@@ -31,7 +31,7 @@ class ResourceIndex implements ResourceIndexContract
 
     protected ResourceCollection|JsonResource|string $resourceClassName;
 
-    protected BuilderContract|ScoutBuilderContract $query;
+    protected BuilderContract|ScoutBuilderContract|null $query = null;
 
     protected int $perPage = 15;
 
