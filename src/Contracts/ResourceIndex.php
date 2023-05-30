@@ -6,12 +6,12 @@ namespace Atx\ResourceIndex\Contracts;
 
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
-use Laravel\Scout\Builder as ScoutBuilderContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Laravel\Scout\Builder as ScoutBuilderContract;
 
 interface ResourceIndex
 {

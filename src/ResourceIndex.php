@@ -13,7 +13,6 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
-use Laravel\Scout\Builder as ScoutBuilderContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -24,6 +23,7 @@ use Illuminate\Http\Resources\CollectsResources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Str;
+use Laravel\Scout\Builder as ScoutBuilderContract;
 
 class ResourceIndex implements ResourceIndexContract
 {
@@ -329,6 +329,7 @@ class ResourceIndex implements ResourceIndexContract
 
         if ($this->query instanceof ScoutBuilderContract) {
             $this->query->query = $search;
+
             return;
         }
 
