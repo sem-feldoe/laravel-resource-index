@@ -6,6 +6,7 @@ namespace Atx\ResourceIndex\Contracts;
 
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
+use Laravel\Scout\Builder as ScoutBuilderContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ interface ResourceIndex
 
     public function response(): JsonResponse;
 
-    public function useQuery(BuilderContract $query): self;
+    public function useQuery(BuilderContract|ScoutBuilderContract $query): self;
 
     public function with(array $relations, Closure|string|null $callback = null): self;
 

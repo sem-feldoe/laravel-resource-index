@@ -13,6 +13,7 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
+use Laravel\Scout\Builder as ScoutBuilderContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -30,7 +31,7 @@ class ResourceIndex implements ResourceIndexContract
 
     protected ResourceCollection|JsonResource|string $resourceClassName;
 
-    protected BuilderContract $query;
+    protected BuilderContract|ScoutBuilderContract $query;
 
     protected int $perPage = 15;
 
@@ -213,10 +214,12 @@ class ResourceIndex implements ResourceIndexContract
         $this->isMultilingual = enum_exists(\App\Enums\SupportedLocale::class)
             && method_exists(\App\Enums\SupportedLocale::class, 'suffixes') // @phpstan-ignore-line
             && count(\App\Enums\SupportedLocale::suffixes()) >= 2;
-        $this->query = $this->model->newQuery()->select($this->model->getTable().'.*');
+        if (is_null($this->query)) {
+            $this->query = $this->model->newQuery()->select($this->model->getTable().'.*');
+        }
     }
 
-    public function useQuery(BuilderContract $query): self
+    public function useQuery(BuilderContract|ScoutBuilderContract $query): self
     {
         $this->query = $query;
 
@@ -264,13 +267,13 @@ class ResourceIndex implements ResourceIndexContract
 
     public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self
     {
+        if (! is_null($defaultSort)) {
+            $this->setDefaultOrder($defaultSort, $defaultSortDirection);
+        }
+
         try {
             $this->processSorts($this->getRequest()->get('sort'), $sorts);
         } catch (NotAResourceClassException) {
-        }
-
-        if (! is_null($defaultSort)) {
-            $this->setDefaultOrder($defaultSort, $defaultSortDirection);
         }
 
         return $this;
@@ -321,6 +324,11 @@ class ResourceIndex implements ResourceIndexContract
     {
         $search = trim((string) $search);
         if (empty($search)) {
+            return;
+        }
+
+        if ($this->query instanceof ScoutBuilderContract) {
+            $this->query->query = $search;
             return;
         }
 
