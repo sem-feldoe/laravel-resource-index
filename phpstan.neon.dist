@@ -9,3 +9,4 @@ parameters:
     checkGenericClassInNonGenericObjectType: false
     ignoreErrors:
         - '#Class App\\Enums\\SupportedLocale not found\.#'
+        - '#Laravel\\Scout\\Builder#'
