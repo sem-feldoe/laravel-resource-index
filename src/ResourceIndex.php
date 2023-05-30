@@ -159,7 +159,7 @@ class ResourceIndex implements ResourceIndexContract
 
         $this->processFilters($request->get('filter', []), $filterable);
 
-        $this->processSearch($request->get('search'), $searchable);
+        $this->processSearch($this->getQuerySearch(), $searchable);
 
         $this->processSorts($request->get('sort'), $orderable);
 
@@ -260,7 +260,7 @@ class ResourceIndex implements ResourceIndexContract
 
     public function allowedSearchColumn(array $columns): self
     {
-        $this->processSearch($this->getRequest()->get('search'), $columns);
+        $this->processSearch($this->getQuerySearch(), $columns);
 
         return $this;
     }
@@ -476,5 +476,16 @@ class ResourceIndex implements ResourceIndexContract
     protected function getRequest(): Request
     {
         return $this->request ?: request();
+    }
+
+    protected function getQuerySearch(): ?string
+    {
+        $request = $this->getRequest();
+        if ($request->has('search')) {
+            return $request->get('search');
+        } elseif($request->has('query')) {
+            return $request->get('query');
+        }
+        return null;
     }
 }
