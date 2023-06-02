@@ -51,6 +51,8 @@ class ResourceIndex implements ResourceIndexContract
 
     protected ?Request $request = null;
 
+    protected bool $sortProcessed = false;
+
     /**
      * @throws NotAModelClassException
      */
@@ -188,6 +190,10 @@ class ResourceIndex implements ResourceIndexContract
      */
     public function response(): JsonResponse
     {
+        if (!$this->sortProcessed) {
+            $this->processSorts();
+        }
+
         if ($this->withPagination) {
             if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
                 $query = $this->query->fastPaginate($this->perPage); // @phpstan-ignore-line
@@ -228,6 +234,7 @@ class ResourceIndex implements ResourceIndexContract
     public function useQuery(BuilderContract|ScoutBuilderContract $query): self
     {
         $this->query = $query;
+        $this->sortProcessed = false;
 
         return $this;
     }
@@ -363,6 +370,7 @@ class ResourceIndex implements ResourceIndexContract
      */
     protected function processSorts(?string $sort, array $sortable = []): void
     {
+        $this->sortProcessed = true;
         if (is_null($sort)) {
             if (method_exists($this->query, 'ordered')) {
                 $this->query->ordered();
