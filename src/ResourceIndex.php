@@ -190,7 +190,7 @@ class ResourceIndex implements ResourceIndexContract
      */
     public function response(): JsonResponse
     {
-        if (!$this->sortProcessed) {
+        if (! $this->sortProcessed) {
             $this->processSorts();
         }
 
