@@ -397,7 +397,7 @@ class ResourceIndex implements ResourceIndexContract
             }
 
             if (isset($sortable[$sortColumn]) && is_callable($sortable[$sortColumn])) {
-                $sortable[$sortColumn]($this->query, $direction);
+                $sortable[$sortColumn]($this->query, $direction, $this);
 
                 continue;
             }
