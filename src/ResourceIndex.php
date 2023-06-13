@@ -227,7 +227,7 @@ class ResourceIndex implements ResourceIndexContract
             throw NotAResourceClassException::of($resource);
         }
 
-        if (!empty($this->additional)) {
+        if (! empty($this->additional)) {
             $resource->additional($this->additional);
         }
 
