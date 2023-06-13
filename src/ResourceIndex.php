@@ -53,6 +53,8 @@ class ResourceIndex implements ResourceIndexContract
 
     protected bool $sortProcessed = false;
 
+    protected array $additional = [];
+
     /**
      * @throws NotAModelClassException
      */
@@ -185,6 +187,13 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
+    public function additional(array $data): self
+    {
+        $this->additional = $data;
+
+        return $this;
+    }
+
     /**
      * @throws NotAResourceClassException
      */
@@ -216,6 +225,10 @@ class ResourceIndex implements ResourceIndexContract
         }
         if (! is_a($resource, JsonResource::class)) {
             throw NotAResourceClassException::of($resource);
+        }
+
+        if (!empty($this->additional)) {
+            $resource->additional($this->additional);
         }
 
         return $resource->response();

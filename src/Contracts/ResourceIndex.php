@@ -53,4 +53,6 @@ interface ResourceIndex
     public function setDefaultOrder(string $column, string $direction = 'asc'): self;
 
     public function withTrashed(): self;
+
+    public function additional(array $data): self;
 }
