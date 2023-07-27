@@ -15,7 +15,7 @@ use Laravel\Scout\Builder as ScoutBuilderContract;
 
 interface ResourceIndex
 {
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self;
+    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, Request $request = null): self;
 
     public function filter(array $filters): self;
 
@@ -34,13 +34,13 @@ interface ResourceIndex
 
     public function allowedSearchColumn(array $columns): self;
 
-    public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self;
+    public function allowedSorts(array $sorts, string $defaultSort = null, string $defaultSortDirection = 'asc'): self;
 
     public function response(): JsonResponse;
 
     public function useQuery(BuilderContract|ScoutBuilderContract $query): self;
 
-    public function with(array $relations, Closure|string|null $callback = null): self;
+    public function with(array $relations, Closure|string $callback = null): self;
 
     public function withCount(array $relations): self;
 

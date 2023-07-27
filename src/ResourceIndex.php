@@ -58,7 +58,7 @@ class ResourceIndex implements ResourceIndexContract
     /**
      * @throws NotAModelClassException
      */
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self
+    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, Request $request = null): self
     {
         if (is_string($model)) {
             $model = app($model);
@@ -263,7 +263,7 @@ class ResourceIndex implements ResourceIndexContract
         return $table.'.'.$column;
     }
 
-    public function with(array $relations, Closure|string|null $callback = null): self
+    public function with(array $relations, Closure|string $callback = null): self
     {
         $this->query->with($relations, $callback);
 
@@ -291,7 +291,7 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-    public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self
+    public function allowedSorts(array $sorts, string $defaultSort = null, string $defaultSortDirection = 'asc'): self
     {
         if (! is_null($defaultSort)) {
             $this->setDefaultOrder($defaultSort, $defaultSortDirection);
@@ -389,7 +389,7 @@ class ResourceIndex implements ResourceIndexContract
                 $this->query->ordered();
             }
 
-            $sort[] = ($this->defaultSortDirection === 'desc'?'-':'').$this->defaultSortColumn;
+            $sort[] = ($this->defaultSortDirection === 'desc' ? '-' : '').$this->defaultSortColumn;
         }
 
         $sort = explode(',', $sort);
