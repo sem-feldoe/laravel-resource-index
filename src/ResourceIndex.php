@@ -389,7 +389,7 @@ class ResourceIndex implements ResourceIndexContract
                 $this->query->ordered();
             }
 
-            $sort[] = ($this->defaultSortDirection === 'desc' ? '-' : '').$this->defaultSortColumn;
+            $sort = ($this->defaultSortDirection === 'desc' ? '-' : '').$this->defaultSortColumn;
         }
 
         $sort = explode(',', $sort);
