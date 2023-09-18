@@ -21,7 +21,7 @@ interface ResourceIndex
 
     public function secured(): self;
 
-    public function published(): self;
+    public function published(string $startColumn = 'publish_up', string $endColumn = 'publish_down'): self;
 
     public function processRequest(
         Request $request,

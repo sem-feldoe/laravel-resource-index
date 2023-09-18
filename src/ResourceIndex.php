@@ -13,6 +13,7 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -103,15 +104,16 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-    public function published(): self
+    public function published(string $startColumn = 'publish_up', string $endColumn = 'publish_down'): self
     {
         $this->query->where('active', true)
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->where('publish_down', '>=', now())
-                        ->orWhereNull('publish_down');
-                })->where('publish_up', '<=', now());
-            });
+            ->where(fn (Builder $query) =>
+                $query->where(fn (Builder $subQuery) =>
+                $subQuery->where($endColumn, '>=', now())
+                        ->orWhereNull($endColumn)
+                )
+                    ->where($startColumn, '<=', now())
+            );
 
         return $this;
     }
