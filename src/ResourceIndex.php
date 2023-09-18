@@ -107,12 +107,10 @@ class ResourceIndex implements ResourceIndexContract
     public function published(string $startColumn = 'publish_up', string $endColumn = 'publish_down'): self
     {
         $this->query->where('active', true)
-            ->where(fn (Builder $query) =>
-                $query->where(fn (Builder $subQuery) =>
-                $subQuery->where($endColumn, '>=', now())
-                        ->orWhereNull($endColumn)
-                )
-                    ->where($startColumn, '<=', now())
+            ->where(fn (Builder $query) => $query->where(fn (Builder $subQuery) => $subQuery->where($endColumn, '>=', now())
+                ->orWhereNull($endColumn)
+            )
+                ->where($startColumn, '<=', now())
             );
 
         return $this;
