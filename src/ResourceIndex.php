@@ -61,23 +61,10 @@ class ResourceIndex implements ResourceIndexContract
      */
     public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, Request $request = null): self
     {
-        if (is_string($model)) {
-            $model = app($model);
-        }
+        $this->model = $this->getModelClass($model);
+        $this->resourceClassName = $this->getResourceClass($resource);
 
-        if (! is_string($resource)) {
-            $resource = get_class($resource);
-        }
-
-        if (! is_a($model, Model::class)) {
-            throw NotAModelClassException::of($model);
-        }
-
-        $this->model = $model;
-
-        $this->resourceClassName = $resource;
-
-        $this->init();
+        $this->initializeProperties();
 
         if (! is_null($request)) {
             try {
@@ -203,6 +190,11 @@ class ResourceIndex implements ResourceIndexContract
             $this->processSorts(null);
         }
 
+        if ($this->nested) {
+            $this->query->whereNull($this->materializeColumnName('parent_id'))->with('children');
+        }
+
+
         if ($this->withPagination) {
             if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
                 $query = $this->query->fastPaginate($this->perPage); // @phpstan-ignore-line
@@ -234,6 +226,21 @@ class ResourceIndex implements ResourceIndexContract
         return $resource->response();
     }
 
+    private function initializeProperties(): void
+    {
+        $this->init();
+        $this->sortProcessed = false;
+        $this->additional = [];
+        $this->nested = false;
+        $this->withPagination = false;
+        $this->defaultSortColumn = 'id';
+        $this->defaultSortDirection = 'asc';
+        $this->isMultilingual = false;
+        $this->limit = null;
+        $this->offset = null;
+        $this->request = null;
+    }
+
     private function init(): void
     {
         $this->isMultilingual = enum_exists(\App\Enums\SupportedLocale::class)
@@ -242,6 +249,25 @@ class ResourceIndex implements ResourceIndexContract
         if (is_null($this->query)) {
             $this->query = $this->model->newQuery()->select($this->model->getTable().'.*');
         }
+    }
+
+    private function getModelClass($model): Model
+    {
+        if (is_string($model)) {
+            $model = app($model);
+        }
+        if (! is_a($model, Model::class)) {
+            throw NotAModelClassException::of($model);
+        }
+        return $model;
+    }
+
+    private function getResourceClass($resource): string
+    {
+        if (! is_string($resource)) {
+            $resource = get_class($resource);
+        }
+        return $resource;
     }
 
     public function useQuery(BuilderContract|ScoutBuilderContract $query): self
@@ -339,10 +365,6 @@ class ResourceIndex implements ResourceIndexContract
                     $this->query->where($filter, $value);
                 }
             }
-        }
-
-        if ($this->nested) {
-            $this->query->whereNull($this->materializeColumnName('parent_id'))->with('children');
         }
     }
 
