@@ -59,7 +59,7 @@ class ResourceIndex implements ResourceIndexContract
     /**
      * @throws NotAModelClassException
      */
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, Request $request = null): self
+    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self
     {
         $this->model = $this->getModelClass($model);
         $this->resourceClassName = $this->getResourceClass($resource);
@@ -194,7 +194,6 @@ class ResourceIndex implements ResourceIndexContract
             $this->query->whereNull($this->materializeColumnName('parent_id'))->with('children');
         }
 
-
         if ($this->withPagination) {
             if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
                 $query = $this->query->fastPaginate($this->perPage); // @phpstan-ignore-line
@@ -259,6 +258,7 @@ class ResourceIndex implements ResourceIndexContract
         if (! is_a($model, Model::class)) {
             throw NotAModelClassException::of($model);
         }
+
         return $model;
     }
 
@@ -267,6 +267,7 @@ class ResourceIndex implements ResourceIndexContract
         if (! is_string($resource)) {
             $resource = get_class($resource);
         }
+
         return $resource;
     }
 
@@ -289,7 +290,7 @@ class ResourceIndex implements ResourceIndexContract
         return $table.'.'.$column;
     }
 
-    public function with(array $relations, Closure|string $callback = null): self
+    public function with(array $relations, Closure|string|null $callback = null): self
     {
         $this->query->with($relations, $callback);
 
@@ -317,7 +318,7 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-    public function allowedSorts(array $sorts, string $defaultSort = null, string $defaultSortDirection = 'asc'): self
+    public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self
     {
         if (! is_null($defaultSort)) {
             $this->setDefaultOrder($defaultSort, $defaultSortDirection);
@@ -476,7 +477,7 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-    public function whereHas(string $relation, Closure $callback = null, string $operator = '>=', int $count = 1): self
+    public function whereHas(string $relation, ?Closure $callback = null, string $operator = '>=', int $count = 1): self
     {
         $this->query->whereHas($relation, $callback, $operator, $count);
 
