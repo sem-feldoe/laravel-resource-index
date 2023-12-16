@@ -291,9 +291,15 @@ class ResourceIndex implements ResourceIndexContract
     public function allowedRelations(array $relations): self
     {
         $withRelation = $this->getRequest()->get('with', []);
+        if (!is_array($withRelation)) {
+            $withRelation = [$withRelation];
+        }
         $this->with(array_intersect($withRelation, $relations));
 
         $withRelationCount = $this->getRequest()->get('count', []);
+        if (!is_array($withRelationCount)) {
+            $withRelationCount = [$withRelationCount];
+        }
         $this->withCount(array_intersect($withRelationCount, $relations));
 
         return $this;
