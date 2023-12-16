@@ -34,6 +34,10 @@ class ResourceIndex implements ResourceIndexContract
 
     protected BuilderContract|ScoutBuilderContract|null $query = null;
 
+    protected FilterManager $filterManager;
+
+    protected PaginationManager $paginationManager;
+
     protected int $perPage = 15;
 
     protected bool $nested = false;
@@ -78,15 +82,7 @@ class ResourceIndex implements ResourceIndexContract
 
     public function filter(array $filters): self
     {
-        foreach ($filters as $filter => $value) {
-            if (is_array($value)) {
-                $this->query->whereIn($filter, $value);
-            } elseif (is_null($value)) {
-                $this->query->whereNull($filter);
-            } else {
-                $this->query->where($filter, $value);
-            }
-        }
+        $this->filterManager->filter($this->query, $filters);
 
         return $this;
     }
@@ -149,7 +145,7 @@ class ResourceIndex implements ResourceIndexContract
         }
 
         if (! empty($filterable)) {
-            $this->processFilters($request->get('filter', []), $filterable);
+            $this->filterManager->processFilters($this->query, $request->get('filter', []), $filterable); // Extracted to FilterManager
         }
 
         if (! empty($searchable)) {
@@ -190,39 +186,27 @@ class ResourceIndex implements ResourceIndexContract
             $this->processSorts(null);
         }
 
+        $this->manageNestedQuery();
+
+        return $this->composeResponse($this->executeQuery());
+    }
+
+    private function manageNestedQuery(): void
+    {
         if ($this->nested) {
             $this->query->whereNull($this->materializeColumnName('parent_id'))->with('children');
         }
+    }
 
+    private function executeQuery(): \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
+    {
         if ($this->withPagination) {
-            if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
-                $query = $this->query->fastPaginate($this->perPage); // @phpstan-ignore-line
-            } else {
-                $query = $this->query->paginate($this->perPage);
-            }
-        } else {
-            if (! is_null($this->limit)) {
-                $this->query->take($this->limit);
-            }
-            if (! is_null($this->offset)) {
-                $this->query->skip($this->limit);
-            }
-            $query = $this->query->get();
-        }
-        if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
-            $resource = $this->resourceClassName::make($query);
-        } else {
-            $resource = $this->resourceClassName::collection($query);
-        }
-        if (! is_a($resource, JsonResource::class)) {
-            throw NotAResourceClassException::of($resource);
+            return $this->paginationManager->paginate($this->query, $this->perPage);
         }
 
-        if (! empty($this->additional)) {
-            $resource->additional($this->additional);
-        }
+        $this->paginationManager->applyLimitOffset($this->query, $this->limit, $this->offset);
 
-        return $resource->response();
+        return $this->query->get();
     }
 
     private function initializeProperties(): void
@@ -304,6 +288,17 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
+    public function allowedRelations(array $relations): self
+    {
+        $withRelation = $this->getRequest()->get('with', []);
+        $this->with(array_intersect($withRelation, $relations));
+
+        $withRelationCount = $this->getRequest()->get('count', []);
+        $this->withCount(array_intersect($withRelationCount, $relations));
+
+        return $this;
+    }
+
     public function allowedFilters(array $filters): self
     {
         $this->processFilters($this->getRequest()->get('filter', []), $filters);
@@ -330,43 +325,6 @@ class ResourceIndex implements ResourceIndexContract
         }
 
         return $this;
-    }
-
-    protected function processFilters(array $filters, array $filterable): void
-    {
-        foreach ($filters as $filter => $value) {
-            // Special id filter
-            if ($filter == 'id') {
-                if (! is_array($value)) {
-                    $value = [$value];
-                }
-                $this->query->whereIn('id', $value);
-
-                continue;
-            }
-
-            if (! array_key_exists($filter, $filterable)) {
-                continue;
-            }
-            $filter = $filterable[$filter];
-            if (str_contains($filter, '.')) {
-                // relation filter
-                [$relation, $filter] = explode('.', $filter, 2);
-                $this->query->whereHas($relation, function ($query) use ($filter, $value) {
-                    if (is_array($value)) {
-                        $query->whereIn($filter, $value);
-                    } else {
-                        $query->where($filter, $value);
-                    }
-                });
-            } else {
-                if (is_array($value)) {
-                    $this->query->whereIn($filter, $value);
-                } else {
-                    $this->query->where($filter, $value);
-                }
-            }
-        }
     }
 
     protected function processSearch(?string $search, array $searchable): void
@@ -536,5 +494,24 @@ class ResourceIndex implements ResourceIndexContract
         }
 
         return null;
+    }
+
+    private function composeResponse(
+        \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $executeQuery
+    ): JsonResponse {
+        if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
+            $resource = $this->resourceClassName::make($queryResult);
+        } else {
+            $resource = $this->resourceClassName::collection($queryResult);
+        }
+        if (! is_a($resource, JsonResource::class)) {
+            throw NotAResourceClassException::of($resource);
+        }
+
+        if (! empty($this->additional)) {
+            $resource->additional($this->additional);
+        }
+
+        return $resource->response();
     }
 }

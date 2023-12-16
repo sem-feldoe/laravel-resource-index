@@ -32,6 +32,8 @@ interface ResourceIndex
 
     public function allowedFilters(array $filters): self;
 
+    public function allowedRelations(array $relations): self;
+
     public function allowedSearchColumn(array $columns): self;
 
     public function allowedSorts(array $sorts, ?string $defaultSort = null, string $defaultSortDirection = 'asc'): self;
