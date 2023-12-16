@@ -60,6 +60,12 @@ class ResourceIndex implements ResourceIndexContract
 
     protected array $additional = [];
 
+    public function __construct()
+    {
+        $this->filterManager = new FilterManager;
+        $this->paginationManager = new PaginationManager;
+    }
+
     /**
      * @throws NotAModelClassException
      */
