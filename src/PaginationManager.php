@@ -20,7 +20,7 @@ final class PaginationManager
         return $query->paginate($perPage);
     }
 
-    public function applyLimitOffset(EloquentBuilder|ScoutBuilder|null $query, ?int $limit, ?int $offset): EloquentBuilder
+    public function applyLimitOffset(EloquentBuilder|ScoutBuilder|null $query, ?int $limit, ?int $offset): \Illuminate\Database\Eloquent\Collection
     {
         if (! is_null($limit)) {
             $query->take($limit);

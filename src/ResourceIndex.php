@@ -301,7 +301,10 @@ class ResourceIndex implements ResourceIndexContract
 
     public function allowedFilters(array $filters): self
     {
-        $this->processFilters($this->getRequest()->get('filter', []), $filters);
+        try {
+            $this->filterManager->processFilters($this->query, $this->getRequest()->get('filter', []), $filters);
+        } catch (Exception) {
+        }
 
         return $this;
     }
@@ -497,12 +500,12 @@ class ResourceIndex implements ResourceIndexContract
     }
 
     private function composeResponse(
-        \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $executeQuery
+        \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $query
     ): JsonResponse {
         if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
-            $resource = $this->resourceClassName::make($queryResult);
+            $resource = $this->resourceClassName::make($query);
         } else {
-            $resource = $this->resourceClassName::collection($queryResult);
+            $resource = $this->resourceClassName::collection($query);
         }
         if (! is_a($resource, JsonResource::class)) {
             throw NotAResourceClassException::of($resource);
