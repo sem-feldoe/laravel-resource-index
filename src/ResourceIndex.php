@@ -530,8 +530,8 @@ class ResourceIndex implements ResourceIndexContract
         $requestedRelations = is_array($requestedRelations) ? $requestedRelations : [$requestedRelations];
 
         $mappedRelations = [];
-        foreach($requestedRelations as $relation) {
-            if($this->isAssociativeArray($relations) && isset($relations[$relation])) {
+        foreach ($requestedRelations as $relation) {
+            if ($this->isAssociativeArray($relations) && isset($relations[$relation])) {
                 $mappedRelations[] = $relations[$relation];
             } elseif (in_array($relation, $relations)) {
                 $mappedRelations[] = $relation;
@@ -540,8 +540,12 @@ class ResourceIndex implements ResourceIndexContract
         call_user_func($callback, $mappedRelations);
     }
 
-    private function isAssociativeArray(array $arr): bool {
-        if ([] === $arr) return false;
+    private function isAssociativeArray(array $arr): bool
+    {
+        if ($arr === []) {
+            return false;
+        }
+
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }
