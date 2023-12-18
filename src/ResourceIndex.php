@@ -296,17 +296,8 @@ class ResourceIndex implements ResourceIndexContract
 
     public function allowedRelations(array $relations): self
     {
-        $withRelation = $this->getRequest()->get('with', []);
-        if (! is_array($withRelation)) {
-            $withRelation = [$withRelation];
-        }
-        $this->with(array_intersect($withRelation, $relations));
-
-        $withRelationCount = $this->getRequest()->get('count', []);
-        if (! is_array($withRelationCount)) {
-            $withRelationCount = [$withRelationCount];
-        }
-        $this->withCount(array_intersect($withRelationCount, $relations));
+        $this->handleAllowedRelations($relations, 'with', [$this, 'with']);
+        $this->handleAllowedRelations($relations, 'count', [$this, 'withCount']);
 
         return $this;
     }
@@ -511,6 +502,9 @@ class ResourceIndex implements ResourceIndexContract
         return null;
     }
 
+    /**
+     * @throws \Atx\ResourceIndex\Exceptions\NotAResourceClassException
+     */
     private function composeResponse(
         \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $query
     ): JsonResponse {
@@ -528,5 +522,26 @@ class ResourceIndex implements ResourceIndexContract
         }
 
         return $resource->response();
+    }
+
+    private function handleAllowedRelations(array $relations, string $requestProperty, callable $callback): void
+    {
+        $requestedRelations = $this->getRequest()->get($requestProperty, []);
+        $requestedRelations = is_array($requestedRelations) ? $requestedRelations : [$requestedRelations];
+
+        $mappedRelations = [];
+        foreach($requestedRelations as $relation) {
+            if($this->isAssociativeArray($relations) && isset($relations[$relation])) {
+                $mappedRelations[] = $relations[$relation];
+            } elseif (in_array($relation, $relations)) {
+                $mappedRelations[] = $relation;
+            }
+        }
+        call_user_func($callback, $mappedRelations);
+    }
+
+    private function isAssociativeArray(array $arr): bool {
+        if ([] === $arr) return false;
+        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }
