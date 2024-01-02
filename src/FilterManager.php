@@ -55,6 +55,12 @@ final class FilterManager
                 continue;
             }
             $filter = $filterable[$filter];
+
+            if (is_callable($filter)) {
+                $query = $filter($this, $query, $value);
+                continue;
+            }
+
             if (str_contains($filter, '.')) {
                 // relation filter
                 [$relation, $filter] = explode('.', $filter, 2);
@@ -65,12 +71,13 @@ final class FilterManager
                         $query->where($filter, $value);
                     }
                 });
+                continue;
+            }
+
+            if (is_array($value)) {
+                $query->whereIn($filter, $value);
             } else {
-                if (is_array($value)) {
-                    $query->whereIn($filter, $value);
-                } else {
-                    $query->where($filter, $value);
-                }
+                $query->where($filter, $value);
             }
         }
     }
