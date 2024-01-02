@@ -58,6 +58,7 @@ final class FilterManager
 
             if (is_callable($filter)) {
                 $query = $filter($this, $query, $value);
+
                 continue;
             }
 
@@ -71,6 +72,7 @@ final class FilterManager
                         $query->where($filter, $value);
                     }
                 });
+
                 continue;
             }
 
