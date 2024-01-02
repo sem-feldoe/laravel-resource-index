@@ -57,7 +57,7 @@ final class FilterManager
             $filter = $filterable[$filter];
 
             if (is_callable($filter)) {
-                $query = $filter($this, $query, $value);
+                $filter($this, $query, $value);
 
                 continue;
             }
