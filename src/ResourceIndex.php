@@ -217,7 +217,6 @@ class ResourceIndex implements ResourceIndexContract
 
     private function initializeProperties(): void
     {
-        $this->init();
         $this->sortProcessed = false;
         $this->additional = [];
         $this->nested = false;
@@ -228,6 +227,7 @@ class ResourceIndex implements ResourceIndexContract
         $this->limit = null;
         $this->offset = null;
         $this->request = null;
+        $this->init();
     }
 
     private function init(): void
