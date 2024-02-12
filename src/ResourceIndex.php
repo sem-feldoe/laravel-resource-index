@@ -210,9 +210,7 @@ class ResourceIndex implements ResourceIndexContract
             return $this->paginationManager->paginate($this->query, $this->perPage);
         }
 
-        $this->paginationManager->applyLimitOffset($this->query, $this->limit, $this->offset);
-
-        return $this->query->get();
+        return $this->paginationManager->applyLimitOffset($this->query, $this->limit, $this->offset);
     }
 
     private function initializeProperties(): void
