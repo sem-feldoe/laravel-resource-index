@@ -19,6 +19,8 @@ interface ResourceIndex
 
     public function filter(array $filters): self;
 
+    public function withScopes(array $scopes): self;
+
     public function secured(): self;
 
     public function published(string $startColumn = 'publish_up', string $endColumn = 'publish_down'): self;

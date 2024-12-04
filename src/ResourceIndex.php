@@ -93,6 +93,13 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
+    public function withScopes(array $scopes): self
+    {
+        $this->query->scopes($scopes);
+
+        return $this;
+    }
+
     public function published(string $startColumn = 'publish_up', string $endColumn = 'publish_down'): self
     {
         $this->query->where('active', true)
