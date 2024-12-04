@@ -6,6 +6,4 @@ namespace Atx\ResourceIndex\Exceptions;
 
 use Exception;
 
-class MissingTranslationRequirementsException extends Exception
-{
-}
+class MissingTranslationRequirementsException extends Exception {}
