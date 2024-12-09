@@ -66,10 +66,12 @@ final class FilterManager
                 // relation filter
                 [$relation, $filter] = explode('.', $filter, 2);
                 $query->whereHas($relation, function ($query) use ($filter, $value) {
+                    $relatedTable = $query->getModel()->getTable();
+                    $prefixedFilter = $relatedTable.'.'.$filter;
                     if (is_array($value)) {
-                        $query->whereIn($filter, $value);
+                        $query->whereIn($prefixedFilter, $value);
                     } else {
-                        $query->where($filter, $value);
+                        $query->where($prefixedFilter, $value);
                     }
                 });
 
