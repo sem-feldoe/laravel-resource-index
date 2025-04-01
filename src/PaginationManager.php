@@ -13,7 +13,8 @@ final class PaginationManager
         EloquentBuilder|ScoutBuilder|null $query,
         int $perPage
     ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
-        if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class)) {
+        if (class_exists(\Hammerstone\FastPaginate\Hammerstone\FastPaginate::class) ||
+            class_exists(\AaronFrancis\FastPaginate\FastPaginate::class)) {
             return $query->fastPaginate($perPage); // @phpstan-ignore-line
         }
 
