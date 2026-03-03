@@ -490,7 +490,7 @@ class ResourceIndex implements ResourceIndexContract
             ->orderBy("{$translationTable}.{$translationField}", $sortMethod);
     }
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request ?: request();
     }

@@ -59,4 +59,6 @@ interface ResourceIndex
     public function withTrashed(): self;
 
     public function additional(array $data): self;
+
+    public function getRequest(): Request;
 }
