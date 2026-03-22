@@ -13,16 +13,19 @@ use Closure;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\Builder as BuilderContract;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\CollectsResources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Builder as ScoutBuilderContract;
 
@@ -176,7 +179,7 @@ class ResourceIndex implements ResourceIndexContract
 
     public function withTrashed(): self
     {
-        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses($this->model))) {
+        if (in_array(SoftDeletes::class, class_uses($this->model))) {
             $this->query->withTrashed(); // @phpstan-ignore-line
         }
 
@@ -211,7 +214,7 @@ class ResourceIndex implements ResourceIndexContract
         }
     }
 
-    private function executeQuery(): \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
+    private function executeQuery(): LengthAwarePaginator|Collection
     {
         if ($this->withPagination) {
             return $this->paginationManager->paginate($this->query, $this->perPage);
@@ -237,9 +240,9 @@ class ResourceIndex implements ResourceIndexContract
 
     private function init(): void
     {
-        $this->isMultilingual = enum_exists(\App\Enums\SupportedLocale::class)
-            && method_exists(\App\Enums\SupportedLocale::class, 'suffixes') // @phpstan-ignore-line
-            && count(\App\Enums\SupportedLocale::suffixes()) >= 2;
+        $this->isMultilingual = enum_exists(SupportedLocale::class)
+            && method_exists(SupportedLocale::class, 'suffixes') // @phpstan-ignore-line
+            && count(SupportedLocale::suffixes()) >= 2;
         if (is_null($this->query)) {
             $this->query = $this->model->newQuery()->select($this->model->getTable().'.*');
         }
@@ -454,7 +457,7 @@ class ResourceIndex implements ResourceIndexContract
     }
 
     /**
-     * @throws BindingResolutionException|\Atx\ResourceIndex\Exceptions\NotAResourceClassException|\Atx\ResourceIndex\Exceptions\MissingTranslationRequirementsException
+     * @throws BindingResolutionException|NotAResourceClassException|MissingTranslationRequirementsException
      */
     protected function sortByTranslation(
         string $locale,
@@ -508,10 +511,10 @@ class ResourceIndex implements ResourceIndexContract
     }
 
     /**
-     * @throws \Atx\ResourceIndex\Exceptions\NotAResourceClassException
+     * @throws NotAResourceClassException
      */
     private function composeResponse(
-        \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection $query
+        LengthAwarePaginator|Collection $query
     ): JsonResponse {
         if (in_array(CollectsResources::class, class_uses_recursive($this->resourceClassName))) {
             $resource = $this->resourceClassName::make($query);
