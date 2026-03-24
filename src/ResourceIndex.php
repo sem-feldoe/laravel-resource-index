@@ -356,9 +356,7 @@ class ResourceIndex implements ResourceIndexContract
 
         $this->query->where(function ($query) use ($search, $searchable) {
             foreach ($searchable as $column) {
-                if (is_callable($column)) {
-                    $column($this, $query, $search);
-                } else {
+                if (is_string($column)) {
                     if (str_contains($column, '.')) {
                         [$relation, $column] = explode('.', $column, 2);
                         $query->orWhereHas(
@@ -368,6 +366,10 @@ class ResourceIndex implements ResourceIndexContract
                     } else {
                         $query->orWhere($column, 'like', '%'.$search.'%');
                     }
+                    continue;
+                }
+                if (is_callable($column)) {
+                    $column($this, $query, $search);
                 }
             }
         });
