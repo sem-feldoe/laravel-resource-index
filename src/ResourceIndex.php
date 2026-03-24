@@ -366,6 +366,7 @@ class ResourceIndex implements ResourceIndexContract
                     } else {
                         $query->orWhere($column, 'like', '%'.$search.'%');
                     }
+
                     continue;
                 }
                 if (is_callable($column)) {
