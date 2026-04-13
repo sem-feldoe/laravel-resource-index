@@ -44,7 +44,7 @@ interface ResourceIndex
 
     public function useQuery(BuilderContract|ScoutBuilderContract $query): self;
 
-    public function tapQuery(Closure $callback): self
+    public function tapQuery(Closure $callback): self;
 
     public function with(array $relations, Closure|string|null $callback = null): self;
 
