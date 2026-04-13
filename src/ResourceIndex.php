@@ -277,7 +277,6 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
-
     public function tapQuery(Closure $callback): self
     {
         $result = $callback($this->query);
