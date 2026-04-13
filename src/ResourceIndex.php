@@ -277,6 +277,18 @@ class ResourceIndex implements ResourceIndexContract
         return $this;
     }
 
+
+    public function tapQuery(Closure $callback): self
+    {
+        $result = $callback($this->query);
+
+        if ($result instanceof BuilderContract || $result instanceof ScoutBuilderContract) {
+            $this->query = $result;
+        }
+
+        return $this;
+    }
+
     public function materializeColumnName(string $column): string
     {
         if (str_contains($column, '.')) {
