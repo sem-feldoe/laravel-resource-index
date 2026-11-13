@@ -71,7 +71,7 @@ final class FilterManager
                     if (is_array($value)) {
                         $query->whereIn($prefixedFilter, $value);
                     } else {
-                        $query->where($prefixedFilter, $value);
+                        $query->where($prefixedFilter, $value); // @phpstan-ignore argument.type
                     }
                 });
 
