@@ -22,8 +22,8 @@
     "illuminate/support": "^9.0|^10.0|^11.0|^12.0|^13.0"
   },
   "require-dev": {
-    "nunomaduro/larastan" : "^2.0",
-    "orchestra/testbench" : "^7.16",
+    "nunomaduro/larastan": "^2.0",
+    "orchestra/testbench": "^7.16",
     "phpstan/extension-installer": "^1.2.0"
   },
   "autoload": {
@@ -50,5 +50,8 @@
     }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "suggest": {
+    "laravel/wayfinder": "Optional TypeScript response generation for endpoints using ResourceIndexResponse."
+  }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Atx\ResourceIndex;
 
 use App\Enums\SupportedLocale;
+use Atx\ResourceIndex\Attributes\ResourceIndexResponse;
 use Atx\ResourceIndex\Contracts\ResourceIndex as ResourceIndexContract;
 use Atx\ResourceIndex\Exceptions\MissingTranslationRequirementsException;
 use Atx\ResourceIndex\Exceptions\NotAModelClassException;
@@ -28,6 +29,8 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Builder as ScoutBuilderContract;
+use InvalidArgumentException;
+use LogicException;
 
 class ResourceIndex implements ResourceIndexContract
 {
@@ -46,6 +49,8 @@ class ResourceIndex implements ResourceIndexContract
     protected bool $nested = false;
 
     protected bool $withPagination = false;
+
+    protected bool $hasResponseContract = false;
 
     protected string $defaultSortColumn = 'id';
 
@@ -72,8 +77,19 @@ class ResourceIndex implements ResourceIndexContract
     /**
      * @throws NotAModelClassException
      */
-    public function from(Model|string $model, ResourceCollection|JsonResource|string $resource, ?Request $request = null): self
+    public function from(Model|string $model, ResourceCollection|JsonResource|string|null $resource = null, ?Request $request = null): self
     {
+        $definition = ResourceIndexResponse::forRequest($request ?? request());
+        if (null !== $definition) {
+            if (null !== $resource) {
+                throw new LogicException('Declare the ResourceIndex resource either in #[ResourceIndexResponse] or in from(), not both.');
+            }
+            $resource = $definition->resource;
+        }
+        if (null === $resource) {
+            throw new LogicException('ResourceIndex requires a resource argument or #[ResourceIndexResponse].');
+        }
+        $this->hasResponseContract = null !== $definition;
         $this->model = $this->getModelClass($model);
         $this->resourceClassName = $this->getResourceClass($resource);
 
@@ -188,6 +204,10 @@ class ResourceIndex implements ResourceIndexContract
 
     public function additional(array $data): self
     {
+        if ($this->hasResponseContract && array_key_exists('data', $data)) {
+            throw new InvalidArgumentException('The data key is reserved for ResourceIndex items.');
+        }
+
         $this->additional = $data;
 
         return $this;

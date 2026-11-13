@@ -1,0 +1,45 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo_sqlite
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - run: vendor/bin/phpunit -c phpunit.xml.dist
+
+  wayfinder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite
+          coverage: none
+      - name: Install optional integration dependencies
+        run: |
+          mkdir -p /tmp/resource-index-integration
+          cat > /tmp/resource-index-integration/composer.json <<'JSON'
+          {
+            "require": {
+              "laravel/framework": "^13.0",
+              "laravel/wayfinder": "dev-next",
+              "phpunit/phpunit": "^13.0"
+            },
+            "minimum-stability": "dev",
+            "prefer-stable": true
+          }
+          JSON
+          composer install --working-dir=/tmp/resource-index-integration --no-interaction --prefer-dist
+      - name: Run package and adapter tests
+        env:
+          RESOURCE_INDEX_TEST_AUTOLOAD: /tmp/resource-index-integration/vendor/autoload.php
+        run: /tmp/resource-index-integration/vendor/bin/phpunit -c phpunit.xml.dist

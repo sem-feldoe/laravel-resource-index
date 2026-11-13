@@ -1,3 +1,6 @@
+includes:
+    - phpstan-optional.php
+
 parameters:
     paths:
         - src
