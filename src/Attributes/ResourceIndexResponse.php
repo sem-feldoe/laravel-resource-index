@@ -30,7 +30,7 @@ final class ResourceIndexResponse
         }
         $attributes = (new ReflectionMethod($controller, $method))->getAttributes(self::class);
 
-        return [] === $attributes ? null : $attributes[0]->newInstance();
+        return $attributes === [] ? null : $attributes[0]->newInstance();
     }
 
     public static function forRequest(Request $request): ?self
@@ -40,7 +40,7 @@ final class ResourceIndexResponse
             return null;
         }
         $controller = $route->getControllerClass();
-        if (null === $controller || ! class_exists($controller)) {
+        if ($controller === null || ! class_exists($controller)) {
             return null;
         }
 

@@ -30,7 +30,7 @@ final class DescribeResponse
             return;
         }
         $definition = ResourceIndexResponse::forController($controller, $route->method());
-        if (null === $definition) {
+        if ($definition === null) {
             return;
         }
         if (is_a($definition->resource, ResourceCollection::class, true)) {
@@ -48,7 +48,7 @@ final class DescribeResponse
             'links' => Type::arrayShape(Type::string(), Type::mixed())->optional(),
         ];
         $responses = [new JsonResponse($payload)];
-        if (null === $wrap) {
+        if ($wrap === null) {
             $responses[] = new ResourceResponse($definition->resource, $resource->data->value, true, null);
         }
         $route->setPossibleResponses($responses);

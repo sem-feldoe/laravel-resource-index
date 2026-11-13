@@ -8,7 +8,7 @@ $loader->addPsr4('Atx\\ResourceIndex\\Tests\\', __DIR__, true);
 
 $map = [];
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__).'/src')) as $file) {
-    if ($file->isFile() && 'php' === $file->getExtension()) {
+    if ($file->isFile() && $file->getExtension() === 'php') {
         $relative = substr($file->getPathname(), strlen(dirname(__DIR__).'/src/'), -4);
         $map['Atx\\ResourceIndex\\'.str_replace('/', '\\', $relative)] = $file->getPathname();
     }

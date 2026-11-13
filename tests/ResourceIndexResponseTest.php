@@ -167,7 +167,7 @@ final class ResourceIndexResponseTest extends TestCase
                 $request = $this->request('legacy');
                 $legacy = (new ResourceIndex)->from(User::class, UserResource::class)->processRequest($request)->additional($additional)->response()->getData(true);
                 self::assertSame($legacy, $actual);
-                if ([] === $additional) {
+                if ($additional === []) {
                     self::assertSame(['id' => 1, 'name' => 'Alice'], $actual[0]);
                 } else {
                     self::assertSame(['count' => 2], $actual['summary']);

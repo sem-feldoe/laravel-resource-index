@@ -28,8 +28,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Laravel\Scout\Builder as ScoutBuilderContract;
 use InvalidArgumentException;
+use Laravel\Scout\Builder as ScoutBuilderContract;
 use LogicException;
 
 class ResourceIndex implements ResourceIndexContract
@@ -80,16 +80,16 @@ class ResourceIndex implements ResourceIndexContract
     public function from(Model|string $model, ResourceCollection|JsonResource|string|null $resource = null, ?Request $request = null): self
     {
         $definition = ResourceIndexResponse::forRequest($request ?? request());
-        if (null !== $definition) {
-            if (null !== $resource) {
+        if ($definition !== null) {
+            if ($resource !== null) {
                 throw new LogicException('Declare the ResourceIndex resource either in #[ResourceIndexResponse] or in from(), not both.');
             }
             $resource = $definition->resource;
         }
-        if (null === $resource) {
+        if ($resource === null) {
             throw new LogicException('ResourceIndex requires a resource argument or #[ResourceIndexResponse].');
         }
-        $this->hasResponseContract = null !== $definition;
+        $this->hasResponseContract = $definition !== null;
         $this->model = $this->getModelClass($model);
         $this->resourceClassName = $this->getResourceClass($resource);
 
