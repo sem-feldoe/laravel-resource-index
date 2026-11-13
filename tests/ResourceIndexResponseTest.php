@@ -8,17 +8,20 @@ use Atx\ResourceIndex\Attributes\ResourceIndexResponse;
 use Atx\ResourceIndex\ResourceIndex;
 use Atx\ResourceIndex\ResourceIndexServiceProvider;
 use Atx\ResourceIndex\Tests\Fixtures\Controller;
+use Atx\ResourceIndex\Tests\Fixtures\InvokableController;
 use Atx\ResourceIndex\Tests\Fixtures\User;
 use Atx\ResourceIndex\Tests\Fixtures\UserResource;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Route;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
@@ -175,6 +178,27 @@ final class ResourceIndexResponseTest extends TestCase
             }
         } finally {
             JsonResource::$wrap = $wrap;
+        }
+    }
+
+    public function test_real_router_resolves_attributes_for_invokable_and_standard_controllers(): void
+    {
+        foreach ([
+            InvokableController::class,
+            [Controller::class, 'index'],
+            Controller::class.'@index',
+        ] as $action) {
+            $container = Container::getInstance();
+            $container->bind(\Atx\ResourceIndex\Contracts\ResourceIndex::class, ResourceIndex::class);
+            $router = new Router(new Dispatcher($container), $container);
+            $router->get('/users', $action);
+            $request = Request::create('/users');
+            $container->instance('request', $request);
+
+            $response = $router->dispatch($request);
+
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame([['id' => 1, 'name' => 'Alice'], ['id' => 2, 'name' => 'Bob']], $response->getData(true)['data']);
         }
     }
 }

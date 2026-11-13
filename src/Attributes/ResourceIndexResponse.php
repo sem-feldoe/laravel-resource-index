@@ -8,6 +8,7 @@ use Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use ReflectionMethod;
 
@@ -39,11 +40,15 @@ final class ResourceIndexResponse
         if (! $route instanceof Route) {
             return null;
         }
-        $controller = $route->getControllerClass();
-        if ($controller === null || ! class_exists($controller)) {
+        $callback = $route->getAction('uses');
+        if (! is_string($callback)) {
+            return null;
+        }
+        [$controller, $method] = Str::parseCallback($callback, '__invoke');
+        if ($controller === null || $method === null || ! class_exists($controller)) {
             return null;
         }
 
-        return self::forController($controller, $route->getActionMethod());
+        return self::forController($controller, $method);
     }
 }
